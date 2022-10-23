@@ -1,10 +1,7 @@
 #define VERSION "3.0.0.1"
 
-// Uncomment this line to enable Walsh3D MK85 Jaw Control (Open/Close)
-//#define WALSH85
-
 // Uncomment this line to enable sound for the S.U.E. expansion board
-//#define SOUND     
+//#define SOUND
 
 // Referenced libraries
 // For installation instructions see https://github.com/netlabtoolkit/VarSpeedServo
@@ -26,19 +23,15 @@ void printDetail(uint8_t type, int value); // header method for implementation b
 #endif
 
 // Declare pin settings
-const int servo1Pin = 9; // set the pin for servo 1
-const int servo2Pin = 10; // set the pin for servo 2
-
-#ifdef WALSH85
-const int servo3Pin = 5; // set the pin for servo 3 (Walsh85 Jaw Control)
-#endif
+const int servo1Pin = 0; // set the pin for servo 1
+const int servo2Pin = 1; // set the pin for servo 2
 
 const int buttonPin = 2; // the pin that the pushbutton is attached to
 
 // led control pins (need to be PWM enabled pins for fading)
-const int leftEyePin =  6;  // left eye LEDs
-const int rightEyePin =  3;  // right eye LEDs
-const int AuxLED = 4; // Aux LED non-PWM
+const int leftEyePin = 6;  // left eye LEDs
+const int rightEyePin = 3; // right eye LEDs
+const int AuxLED = 4;      // Aux LED non-PWM
 
 #ifdef SOUND
 // sound board pins
@@ -50,38 +43,22 @@ const int tx_pin = 8; // set pin for transmit (TX) communications
 VarSpeedServo servo1; // create servo object to control servo 1
 VarSpeedServo servo2; // create servo object to control servo 2
 
-#ifdef WALSH85
-VarSpeedServo servo3; // create servo object to control servo 3 (Walsh85 Jaw Control)
-#endif
-
 // Declare variables for servo speed control
 const int servoCloseSpeed = 100; // set the speed of the servo close function
-const int servoOpenSpeed = 255; // set the speed of the servo opening recommend set to max speed to aid in lift
+const int servoOpenSpeed = 255;  // set the speed of the servo opening recommend set to max speed to aid in lift
 
-//Servo 3 (Walsh85 Jaw Control) variables for servo speed control
-#ifdef WALSH85
-const int jawCloseSpeed = 175; // set the speed of the Jaw closing for Walsh85 Helmet
-const int jawOpenSpeed = 255; // set the speed of the Jaw opening for Walsh85 Helmet
-#endif
-
-// In Dual Servo Configuration the servos move in opposing directions, so the angles of the servos will be opposite to each other. 
+// In Dual Servo Configuration the servos move in opposing directions, so the angles of the servos will be opposite to each other.
 // Normal Servo range is 0° ~ 180°, for initial setup the range has been adjusted to 20° ~ 160°, this allows for a 20° adjustment at both ends of the servo range.
 // See Helmet tutorial for further information on servo setup.
-const int servo1_OpenPos = 20; // set the open position of servo 1
-const int servo2_OpenPos = 160; // set the open position of servo 2
+const int servo1_OpenPos = 20;   // set the open position of servo 1
+const int servo2_OpenPos = 160;  // set the open position of servo 2
 const int servo1_ClosePos = 160; // set the closed position of servo 1
-const int servo2_ClosePos = 20; // set the closed position of servo 2
-
-#ifdef WALSH85
-//Servo 3 (Walsh85 Jaw Control) Open / Close Angle
-const int servo3_OpenPos = 90; // set the open position of servo 2
-const int servo3_ClosePos = 0; // set the closed position of servo 1
-#endif
+const int servo2_ClosePos = 20;  // set the closed position of servo 2
 
 // Declare variables for setup special effects (applies to LED eyes only for now)
-#define SETUP_NONE 0 // No special effects, just turn on the LED eyes
+#define SETUP_NONE 0        // No special effects, just turn on the LED eyes
 #define SETUP_MOVIE_BLINK 1 // Blink LED eyes on setup, sequence based on Avengers Movie
-#define SETUP_FADE_ON 2 // Slowly brighten LED eyes until fully lit
+#define SETUP_FADE_ON 2     // Slowly brighten LED eyes until fully lit
 
 // To use the specific feature below
 // use double slashes "//" to comment, or uncomment (remove double slashes) in the code below
@@ -96,9 +73,9 @@ const int setupFx = SETUP_MOVIE_BLINK;
 // const int setupFx = SETUP_FADE_ON;
 
 // Declare variables for LED eyes special effects (applies to LED eyes only for now)
-#define EYES_NONE 0 // No special effects, just turn on the LED eyes
+#define EYES_NONE 0        // No special effects, just turn on the LED eyes
 #define EYES_MOVIE_BLINK 1 // Blink LED eyes on setup, sequence based on Avengers Movie
-#define EYES_FADE_ON 2 // Slowly brighten LED eyes until fully lit
+#define EYES_FADE_ON 2     // Slowly brighten LED eyes until fully lit
 
 // To use the specific feature below
 // use double slashes "//" to comment, or uncomment (remove double slashes) in the code below
@@ -113,36 +90,36 @@ const int setupFx = SETUP_MOVIE_BLINK;
 const int eyesFx = EYES_FADE_ON;
 
 // Declare variables for button control
-boolean movieblinkOnClose = false; //Blink LEDs on close of faceplate, Sequence based on Avengers Movie
+boolean movieblinkOnClose = false; // Blink LEDs on close of faceplate, Sequence based on Avengers Movie
 
 // Declare variable for AuxLED
 boolean auxLedEnabled = true; // Set to true if you want to enable the Aux LED
-boolean auxLedState = false; // Keeps track of the state of the LED on = true, off = false
+boolean auxLedState = false;  // Keeps track of the state of the LED on = true, off = false
 
 // Declare variables for LED control
-unsigned long fadeDelay = .1; //speed of the eye 'fade'
-unsigned long callDelay = 10; //length to wait to start eye flicker after face plate comes down
-unsigned long blinkSpeed = 60; //delay between init blink on/off
-unsigned long currentPWM = 0; // keep track of where the current PWM level is at
-boolean isOpen = true; // keep track of whether or not the faceplate is open
+unsigned long fadeDelay = .1;  // speed of the eye 'fade'
+unsigned long callDelay = 10;  // length to wait to start eye flicker after face plate comes down
+unsigned long blinkSpeed = 60; // delay between init blink on/off
+unsigned long currentPWM = 0;  // keep track of where the current PWM level is at
+boolean isOpen = true;         // keep track of whether or not the faceplate is open
 
 #ifdef SOUND
 // Declare variables for sound control
 const int volume = 29; // sound board volume level (30 is max)
-#define SND_CLOSE 1 // sound track for helmet closing sound
-#define SND_JARVIS 2 // sound track for JARVIS sound
-#define SND_OPEN 3 // sound track for helmet opening sound
+#define SND_CLOSE 1    // sound track for helmet closing sound
+#define SND_JARVIS 2   // sound track for JARVIS sound
+#define SND_OPEN 3     // sound track for helmet opening sound
 
 SoftwareSerial serialObj(rx_pin, tx_pin); // Create object for serial communications
-DFRobotDFPlayerMini mp3Obj; // Create object for DFPlayer Mini
+DFRobotDFPlayerMini mp3Obj;               // Create object for DFPlayer Mini
 #endif
 
-// Define object for primary button to handle 
+// Define object for primary button to handle
 // multiple button press features:
 // 1. Single Tap
 // 2. Double Tap
 // 3. Long Press
-ButtonEvents primaryButton = ButtonEvents(); 
+ButtonEvents primaryButton = ButtonEvents();
 
 // State of the faceplate 1 = open, 0 = closed
 #define FACEPLATE_CLOSED 0
@@ -158,18 +135,19 @@ int facePlateCurMode = FACEPLATE_OPEN; // Keep track if the faceplate is open or
 #define LED_EYES_BRIGHTEN_MODE 1
 
 int ledEyesCurMode = LED_EYES_DIM_MODE; // Keep track if we're dimming or brightening
-int ledEyesCurPwm = 0; // Tracking the level of the LED eyes for dim/brighten feature
-const int ledEyesIncrement = 15; // Define the increments to brighten or dim the LED eyes
+int ledEyesCurPwm = 0;                  // Tracking the level of the LED eyes for dim/brighten feature
+const int ledEyesIncrement = 15;        // Define the increments to brighten or dim the LED eyes
 
 /**
  * Helper Method
  * Simulate a delay in processing without disabling the processor completely
- * 
+ *
  * @param[out] period - the amount of time in milliseconds to delay
- * 
+ *
  * See: https://randomnerdtutorials.com/why-you-shouldnt-always-use-the-arduino-delay-function/
-*/
-void simDelay(long period){
+ */
+void simDelay(long period)
+{
   long delayMillis = millis() + period;
   while (millis() <= delayMillis)
   {
@@ -179,22 +157,24 @@ void simDelay(long period){
 
 /**
  * Simulate the eyes slowly blinking until fully lit
- */ 
-void movieblink(){
+ */
+void movieblink()
+{
   Serial.println(F("Start Movie Blink.."));
 
   // pause for effect...
   simDelay(300);
 
   int lowValue = 21;
-  int delayInterval[] = { 210, 126, 84 };
+  int delayInterval[] = {210, 126, 84};
   int delayVal = 0;
 
   // First blink on
-  for (int i = 0; i <= lowValue; i++){
+  for (int i = 0; i <= lowValue; i++)
+  {
     setLedEyes(i);
     setAuxLed();
-    delayVal = delayInterval[0]/lowValue;
+    delayVal = delayInterval[0] / lowValue;
     simDelay(delayVal);
   }
 
@@ -204,10 +184,11 @@ void movieblink(){
   simDelay(delayInterval[0]);
 
   // Second blink on
-  for (int i = 0; i <= lowValue; i++){
+  for (int i = 0; i <= lowValue; i++)
+  {
     setLedEyes(i);
     setAuxLed();
-    delayVal = delayInterval[1]/lowValue;
+    delayVal = delayInterval[1] / lowValue;
     simDelay(delayVal);
   }
 
@@ -228,34 +209,37 @@ void movieblink(){
 
   // All on
   setLedEyes(255);
-  auxLedOn();   
+  auxLedOn();
 }
 
 /*
  * Simulate LED eyes slowly brightening until fully lit
  */
- void fadeEyesOn(){
+void fadeEyesOn()
+{
   ledEyesCurMode = LED_EYES_BRIGHTEN_MODE;
 
   // loop until fully lit
-  while (ledEyesCurPwm < 255){
+  while (ledEyesCurPwm < 255)
+  {
     setLedEyes(ledEyesCurPwm);
-  
+
     simDelay(200);
     ledEyesBrighten();
   }
-  
- }
+}
 
 #ifdef SOUND
 /**
  * Initialization method for DFPlayer Mini board
  */
- void init_player(){
+void init_player()
+{
   serialObj.begin(9600);
-  //simDelay(1000); Adjusting Timing Sequence
+  // simDelay(1000); Adjusting Timing Sequence
 
-  if(!serialObj.available()){
+  if (!serialObj.available())
+  {
     Serial.println(F("Serial object not available."));
   }
 
@@ -264,8 +248,9 @@ void movieblink(){
   bool dfInit = mp3Obj.begin(serialObj, false, true);
 
   simDelay(1000);
-  
-  if(!dfInit){
+
+  if (!dfInit)
+  {
     Serial.println(F("Unable to begin:"));
     Serial.println(F("1.Please recheck the connection!"));
     Serial.println(F("2.Please insert the SD card!"));
@@ -275,21 +260,22 @@ void movieblink(){
   }
 
   Serial.println(F("DFPlayer Mini online."));
-  
-  mp3Obj.setTimeOut(500); //Set serial communictaion time out 500ms
-  
+
+  mp3Obj.setTimeOut(500); // Set serial communictaion time out 500ms
+
   Serial.println(F("Setting volume"));
   mp3Obj.volume(volume);
   simDelay(100); // DFRobot Timing 9-9-2022
   mp3Obj.EQ(DFPLAYER_EQ_NORMAL);
   mp3Obj.outputDevice(DFPLAYER_DEVICE_SD);
   simDelay(100); // DFRobot Timing 9-9-2022
- }
+}
 
 /**
  * Method to play the sound effect for a specified feature
  */
-void playSoundEffect(int soundEffect){
+void playSoundEffect(int soundEffect)
+{
   mp3Obj.volume(volume);
   simDelay(100); // DFRobot Timing 9-9-2022
   Serial.print(F("Playing sound effect: "));
@@ -298,69 +284,48 @@ void playSoundEffect(int soundEffect){
   Serial.println(mp3Obj.readVolume());
   simDelay(100); // DFRobot Timing 9-9-2022
   mp3Obj.play(soundEffect);
-  printDetail(mp3Obj.readType(), mp3Obj.read()); //Print the detail message from DFPlayer to handle different errors and states.
+  printDetail(mp3Obj.readType(), mp3Obj.read()); // Print the detail message from DFPlayer to handle different errors and states.
 }
 #endif
 
 /**
  * Method to open face plate
  */
- void facePlateOpen(){
-  Serial.println(F("Servo Up!")); 
+void facePlateOpen()
+{
+  Serial.println(F("Servo Up!"));
 
   // Re-attach the servos to their pins
   servo1.attach(servo1Pin);
   servo2.attach(servo2Pin);
 
-  #ifdef WALSH85
-  servo3.attach(servo3Pin);
-  #endif
-
   // Send data to the servos for movement
-    
+
   servo1.write(servo1_OpenPos, servoOpenSpeed);
   servo2.write(servo2_OpenPos, servoOpenSpeed);
-  
-  #ifdef WALSH85
-  simDelay(500);
-  servo3.write(servo3_OpenPos, jawOpenSpeed);
-  //simDelay(1000); // wait doesn't wait long enough for servos to fully complete...
-  #endif
-  
+
   simDelay(1000); // wait doesn't wait long enough for servos to fully complete...
 
   // Detach so motors don't "idle"
   servo1.detach();
   servo2.detach();
 
-  #ifdef WALSH85
-  servo3.detach();
-  #endif
-
   facePlateCurMode = FACEPLATE_OPEN;
- }
+}
 
- /**
-  * Method to close face plate
-  */
- void facePlateClose(){
-  Serial.println(F("Servo Down"));  
+/**
+ * Method to close face plate
+ */
+void facePlateClose()
+{
+  Serial.println(F("Servo Down"));
 
   // Re-attach the servos to their pins
   servo1.attach(servo1Pin);
   servo2.attach(servo2Pin);
 
-  #ifdef WALSH85
-  servo3.attach(servo3Pin);
-  #endif
+  // Send data to the servos for movement
 
-  // Send data to the servos for movement 
-
-  #ifdef WALSH85
-  servo3.write(servo3_ClosePos, jawCloseSpeed);
-  simDelay(500); // Delay to allow Jaw to fully close before Faceplate closes
-  #endif
-  
   servo1.write(servo1_ClosePos, servoCloseSpeed);
   servo2.write(servo2_ClosePos, servoCloseSpeed);
 
@@ -370,41 +335,40 @@ void playSoundEffect(int soundEffect){
   servo1.detach();
   servo2.detach();
 
-  #ifdef WALSH85
-  servo3.detach();
-  #endif
-
   facePlateCurMode = FACEPLATE_CLOSED;
- }
+}
 
 /**
  * Set the brightness of the LED eyes
- * 
+ *
  * @param[out] pwmValue - the PWM value (0-255) for the LED brightness
  */
-void setLedEyes(int pwmValue){
+void setLedEyes(int pwmValue)
+{
   analogWrite(rightEyePin, pwmValue);
   analogWrite(leftEyePin, pwmValue);
   ledEyesCurPwm = pwmValue;
 }
- 
+
 /**
  * Method to turn on LED eyes
  */
-void ledEyesOn(){
+void ledEyesOn()
+{
   Serial.println(F("Turning LED eyes on..."));
-  
+
   setLedEyes(255);
-  
+
   ledEyesCurMode = LED_EYES_DIM_MODE;
 }
 
 /**
  * Method to turn off LED eyes
  */
-void ledEyesOff(){
+void ledEyesOff()
+{
   Serial.println(F("Turning LED eyes off..."));
-  
+
   setLedEyes(0);
 
   ledEyesCurMode = LED_EYES_BRIGHTEN_MODE;
@@ -413,35 +377,44 @@ void ledEyesOff(){
 /**
  * Method to turn LED eyes on/off
  */
-void ledEyesOnOff(){
+void ledEyesOnOff()
+{
   // LED eyes stay off when faceplate is open
-  if(facePlateCurMode == FACEPLATE_CLOSED){
-    if (ledEyesCurPwm > 0){
+  if (facePlateCurMode == FACEPLATE_CLOSED)
+  {
+    if (ledEyesCurPwm > 0)
+    {
       ledEyesOff();
-    } else {
+    }
+    else
+    {
       ledEyesOn();
     }
   }
 }
 
-void ledEyesDim(){
+void ledEyesDim()
+{
   Serial.println(F("Dimming LED eyes..."));
 
   ledEyesCurPwm = ledEyesCurPwm - ledEyesIncrement; // Decrease the brightness
 
   // Make sure we don't go over the limit
-  if(ledEyesCurPwm <= 0){
+  if (ledEyesCurPwm <= 0)
+  {
     ledEyesCurPwm = 0;
   }
 }
 
-void ledEyesBrighten(){
+void ledEyesBrighten()
+{
   Serial.println(F("Brightening LED eyes..."));
 
   ledEyesCurPwm = ledEyesCurPwm + ledEyesIncrement; // Increase the brightness
 
   // Make sure we don't go over the limit
-  if(ledEyesCurPwm >= 255){
+  if (ledEyesCurPwm >= 255)
+  {
     ledEyesCurPwm = 255;
   }
 }
@@ -449,16 +422,23 @@ void ledEyesBrighten(){
 /**
  * Method to dim or brighten both LED eyes
  */
-void ledEyesFade(){
-  if(ledEyesCurPwm == 255){
+void ledEyesFade()
+{
+  if (ledEyesCurPwm == 255)
+  {
     ledEyesCurMode = LED_EYES_DIM_MODE;
-  } else if(ledEyesCurPwm == 0){
+  }
+  else if (ledEyesCurPwm == 0)
+  {
     ledEyesCurMode = LED_EYES_BRIGHTEN_MODE;
   }
-  
-  if(ledEyesCurMode == LED_EYES_BRIGHTEN_MODE){
+
+  if (ledEyesCurMode == LED_EYES_BRIGHTEN_MODE)
+  {
     ledEyesBrighten();
-  } else {
+  }
+  else
+  {
     ledEyesDim();
   }
 
@@ -470,14 +450,21 @@ void ledEyesFade(){
 /*
  * Sets the Aux LED
  */
-void setAuxLed(){
-  if (auxLedEnabled) {
-    if (auxLedState == false){
+void setAuxLed()
+{
+  if (auxLedEnabled)
+  {
+    if (auxLedState == false)
+    {
       auxLedOn();
-    } else {
+    }
+    else
+    {
       auxLedOff();
     }
-  } else {
+  }
+  else
+  {
     auxLedOff();
   }
 }
@@ -485,7 +472,8 @@ void setAuxLed(){
 /*
  * Turn the Aux LED on
  */
-void auxLedOn(){
+void auxLedOn()
+{
   digitalWrite(AuxLED, HIGH);
   auxLedState = true;
 }
@@ -493,7 +481,8 @@ void auxLedOn(){
 /*
  * Turn the Aux LED off
  */
-void auxLedOff(){
+void auxLedOff()
+{
   digitalWrite(AuxLED, LOW);
   auxLedState = false;
 }
@@ -501,8 +490,9 @@ void auxLedOff(){
 /**
  * Method to run sequence of sppecial effects when system first starts or sets up
  */
-void startupFx(){
-  //facePlateClose();
+void startupFx()
+{
+  // facePlateClose();
 
 #ifdef SOUND
   playSoundEffect(SND_CLOSE);
@@ -511,18 +501,19 @@ void startupFx(){
 
   facePlateClose();
 
-  switch(setupFx){
-    case SETUP_NONE:
-      ledEyesOn();
-      auxLedOn();
-      break;
-    case SETUP_MOVIE_BLINK:
-      movieblink();
-      break;
-    case SETUP_FADE_ON:
-      fadeEyesOn();
-      auxLedOn();
-      break;
+  switch (setupFx)
+  {
+  case SETUP_NONE:
+    ledEyesOn();
+    auxLedOn();
+    break;
+  case SETUP_MOVIE_BLINK:
+    movieblink();
+    break;
+  case SETUP_FADE_ON:
+    fadeEyesOn();
+    auxLedOn();
+    break;
   }
 
 #ifdef SOUND
@@ -534,7 +525,8 @@ void startupFx(){
 /**
  * Method to execute special effects when the faceplate opens
  */
-void facePlateOpenFx(){
+void facePlateOpenFx()
+{
   // TODO: See if we need delays in between fx
 #ifdef SOUND
   playSoundEffect(SND_OPEN);
@@ -548,36 +540,42 @@ void facePlateOpenFx(){
 /**
  * Method to execute special effects when the faceplate closes
  */
-void facePlateCloseFx(){
+void facePlateCloseFx()
+{
 #ifdef SOUND
   playSoundEffect(SND_CLOSE);
-  simDelay(1200); //Timing for Helmet Close Sound and delay to servo closing
+  simDelay(1200); // Timing for Helmet Close Sound and delay to servo closing
 #endif
 
   facePlateClose();
 
-  switch(eyesFx){
-    case EYES_NONE:
-      ledEyesOn();
-      auxLedOn();
-      break;
-    case EYES_MOVIE_BLINK:
-      movieblink();
-      break;
-    case EYES_FADE_ON:
-      fadeEyesOn();
-      auxLedOn();
-      break;
+  switch (eyesFx)
+  {
+  case EYES_NONE:
+    ledEyesOn();
+    auxLedOn();
+    break;
+  case EYES_MOVIE_BLINK:
+    movieblink();
+    break;
+  case EYES_FADE_ON:
+    fadeEyesOn();
+    auxLedOn();
+    break;
   }
 }
 
 /**
  * Handle faceplate special effects
  */
-void facePlateFx(){
-  if (facePlateCurMode == FACEPLATE_OPEN){
+void facePlateFx()
+{
+  if (facePlateCurMode == FACEPLATE_OPEN)
+  {
     facePlateCloseFx();
-  } else {
+  }
+  else
+  {
     facePlateOpenFx();
   }
 }
@@ -585,22 +583,26 @@ void facePlateFx(){
 /**
  * Event handler for when the primary button is tapped once
  */
-void handlePrimaryButtonSingleTap(){
+void handlePrimaryButtonSingleTap()
+{
   facePlateFx();
 }
 
 /**
  * Event handler for when the primary button is double tapped
  */
-void handlePrimaryButtonDoubleTap(){
+void handlePrimaryButtonDoubleTap()
+{
   ledEyesOnOff();
 }
 
 /**
  * Event handler for when the primary button is pressed and held
  */
-void handlePrimaryButtonLongPress(){
-  while(!primaryButton.update()){
+void handlePrimaryButtonLongPress()
+{
+  while (!primaryButton.update())
+  {
     ledEyesFade(); // Dim or brighten the LED eyes
   }
 }
@@ -608,7 +610,8 @@ void handlePrimaryButtonLongPress(){
 /**
  * Initializes the primary button for multi-functions
  */
-void initPrimaryButton(){
+void initPrimaryButton()
+{
   // Attach the button to the pin on the board
   primaryButton.attach(buttonPin, INPUT_PULLUP);
   // Initialize button features...
@@ -621,26 +624,29 @@ void initPrimaryButton(){
 /**
  * Monitor for when the primary button is pushed
  */
-void monitorPrimaryButton(){
+void monitorPrimaryButton()
+{
   bool changed = primaryButton.update();
 
   // Was the button pushed?
-  if (changed){
+  if (changed)
+  {
     int event = primaryButton.event(); // Get how the button was pushed
 
-    switch(event){
-      case(tap):
-        Serial.println(F("Primary button single press..."));
-        handlePrimaryButtonSingleTap();
-        break;
-      case (doubleTap):
-        Serial.println(F("Primary button double press..."));
-        handlePrimaryButtonDoubleTap();
-        break;
-      case (hold):
-        Serial.println(F("Primary button long press..."));
-        handlePrimaryButtonLongPress();
-        break;
+    switch (event)
+    {
+    case (tap):
+      Serial.println(F("Primary button single press..."));
+      handlePrimaryButtonSingleTap();
+      break;
+    case (doubleTap):
+      Serial.println(F("Primary button double press..."));
+      handlePrimaryButtonDoubleTap();
+      break;
+    case (hold):
+      Serial.println(F("Primary button long press..."));
+      handlePrimaryButtonLongPress();
+      break;
     }
   }
 }
@@ -648,10 +654,11 @@ void monitorPrimaryButton(){
 /**
  * Initialization method called by the Arduino library when the board boots up
  */
-void setup() {
+void setup()
+{
   // Set up serial port
-  Serial.begin(115200);  
-  
+  Serial.begin(115200);
+
   simDelay(2000); // Give the serial service time to initialize
 
   Serial.print(F("Initializing Iron Man Servo version: "));
@@ -662,7 +669,7 @@ void setup() {
 #endif
 
   initPrimaryButton(); // initialize the primary button
-  
+
   pinMode(AuxLED, OUTPUT); // set output for AUX LED
 
   startupFx(); // Run the initial features
@@ -672,7 +679,8 @@ void setup() {
  * Main program exeucution
  * This method will run perpetually on the board
  */
-void loop() {
+void loop()
+{
   monitorPrimaryButton(); // Since all features currently are tied to the one button...
 
   // Room for future features ;)
@@ -682,58 +690,61 @@ void loop() {
 /**
  * Method to output any issues with the DFPlayer
  */
-void printDetail(uint8_t type, int value){
-  switch (type) {
-    case TimeOut:
-      Serial.println(F("Time Out!"));
+void printDetail(uint8_t type, int value)
+{
+  switch (type)
+  {
+  case TimeOut:
+    Serial.println(F("Time Out!"));
+    break;
+  case WrongStack:
+    Serial.println(F("Stack Wrong!"));
+    break;
+  case DFPlayerCardInserted:
+    Serial.println(F("Card Inserted!"));
+    break;
+  case DFPlayerCardRemoved:
+    Serial.println(F("Card Removed!"));
+    break;
+  case DFPlayerCardOnline:
+    Serial.println(F("Card Online!"));
+    break;
+  case DFPlayerPlayFinished:
+    Serial.print(F("Number:"));
+    Serial.print(value);
+    Serial.println(F(" Play Finished!"));
+    break;
+  case DFPlayerError:
+    Serial.print(F("DFPlayerError:"));
+    switch (value)
+    {
+    case Busy:
+      Serial.println(F("Card not found"));
       break;
-    case WrongStack:
-      Serial.println(F("Stack Wrong!"));
+    case Sleeping:
+      Serial.println(F("Sleeping"));
       break;
-    case DFPlayerCardInserted:
-      Serial.println(F("Card Inserted!"));
+    case SerialWrongStack:
+      Serial.println(F("Get Wrong Stack"));
       break;
-    case DFPlayerCardRemoved:
-      Serial.println(F("Card Removed!"));
+    case CheckSumNotMatch:
+      Serial.println(F("Check Sum Not Match"));
       break;
-    case DFPlayerCardOnline:
-      Serial.println(F("Card Online!"));
+    case FileIndexOut:
+      Serial.println(F("File Index Out of Bound"));
       break;
-    case DFPlayerPlayFinished:
-      Serial.print(F("Number:"));
-      Serial.print(value);
-      Serial.println(F(" Play Finished!"));
+    case FileMismatch:
+      Serial.println(F("Cannot Find File"));
       break;
-    case DFPlayerError:
-      Serial.print(F("DFPlayerError:"));
-      switch (value) {
-        case Busy:
-          Serial.println(F("Card not found"));
-          break;
-        case Sleeping:
-          Serial.println(F("Sleeping"));
-          break;
-        case SerialWrongStack:
-          Serial.println(F("Get Wrong Stack"));
-          break;
-        case CheckSumNotMatch:
-          Serial.println(F("Check Sum Not Match"));
-          break;
-        case FileIndexOut:
-          Serial.println(F("File Index Out of Bound"));
-          break;
-        case FileMismatch:
-          Serial.println(F("Cannot Find File"));
-          break;
-        case Advertise:
-          Serial.println(F("In Advertise"));
-          break;
-        default:
-          break;
-      }         
+    case Advertise:
+      Serial.println(F("In Advertise"));
       break;
     default:
       break;
+    }
+    break;
+  default:
+    break;
   }
 }
 #endif
